@@ -96,3 +96,8 @@ h1 {
   height:45%;
 }
 }
+p:nth-child(3){
+  text-align: center;
+  font-size: 1.3rem;
+  color: var(--color-contrast)
+}
