@@ -3,9 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <link rel="stylesheet" href="./styles/style.css">
+  <title>Get Weather</title>
 </head>
 <body>
-  
+  <h1>Weather Map</h1>
+  <form class="form-wrapper flex-form">
+    <div class="section-wrapper flex-section">
+      <label for="cityname">City Name</label>
+      <input type="text" id="cityname">
+    </div>
+    <div class="section-wrapper flex-section">
+      <label for="cityid">City Id</label>
+      <input type="text" id="cityid">
+    </div>
+    <div class="section-wrapper flex-section">
+      <div class="small-block">
+        <label for="cn-checked">City Name</label>
+        <input type="radio" id="cn-checked" name="choose">
+      </div>
+      <div class="small-block">
+        <label for="ci-checked">City Id</label>
+        <input type="radio" id="ci-checked" name="choose">
+      </div>
+    </div>
+    <div class="section-wrapper flex-section">
+      <div class="small-block">
+        <p>Temperature</p>
+        <span></span>
+      </div>
+      <div class="small-block">
+        <p>Wind Speed</p>
+        <span></span>
+      </div>
+      <div class="small-block">
+        <p>Humidity</p>
+        <span></span>
+      </div>
+    </div>
+    <div class="buttons">
+      <button>Get Weather</button>
+      <button type="reset">Cancel</button>
+    </div>
+  </form>
 </body>
 </html>
