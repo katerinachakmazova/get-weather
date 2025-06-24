@@ -1,108 +1,62 @@
 'use strict'
-const radioName = document.getElementsByName('choose')[0];
-const radioId = document.getElementsByName('choose')[1];
+const radiobuttons = Array.from(document.getElementsByName('choose'));
+const radioName = radiobuttons[0];
+const radioId = radiobuttons[1];
 const inputName = document.getElementById('cityname');
 const inputId = document.getElementById('cityid');
 const buttonConfirm = document.querySelector('[type="submit"]');
 const buttonCancel = document.querySelector('[type="reset"]');
-const spans = document.getElementsByTagName('span');
+const spans = Array.from(document.getElementsByTagName('span'));
 const p = document.getElementById('message');
-const firstRequestUrl = `http://api.openweathermap.org/geo/1.0/`;
-const secondRequestUrl = `https://api.openweathermap.org/data/2.5/weather?`;
+const requestUrl = `https://api.openweathermap.org/data/2.5/weather?`;
 const appId = '0a1fe5dca73a998ba91495c5f67747c1';
-let firstRequest;
-let secondRequest;
-let chosenOption = 3;
-let data;
-let coordinates;
-const reqExpName = /^[A-Za-z]+$/;
-radioName.addEventListener('change', ()=> {  //checking which radio-button's chosen
-  inputId.setAttribute('disabled', true)
-  inputName.removeAttribute('disabled')
-  chosenOption = 0;
-})
-radioId.addEventListener('change', ()=> {
-  inputName.setAttribute('disabled', true)
-  inputId.removeAttribute('disabled')
-  chosenOption = 1;
-})
-function createRequest(option) {
-  let request;
-  switch(option){                                         
-    case 0: //name
-      data = inputName.value.trim();
-      if(reqExpName.test(data)){
-        request = new Request(`${firstRequestUrl}direct?q=${data}&limit=1&appid=${appId}`)
-      }
-      else {
-        p.textContent = 'Invalid input: use only A-Z and a-z';
-      }
-      break;
-    case 1: //id
-      data = inputId.value.trim();
-      request = new Request(`${firstRequestUrl}zip?zip=${data}&appid=${appId}`)
-      break;
-    case 2: //lat and lon
-      request = new Request(`${secondRequestUrl}lat=${coordinates[0]}&lon=${coordinates[1]}&units=metric&appid=${appId}`)
-      break;
-    case 3: //non of the radio buttons are checked
-      request = 'Please select your option of searching the city (ID or Name)';
-      p.textContent = request;
-      p.removeAttribute('hidden');
-  }
-  return request;
-}
-buttonConfirm.addEventListener('click', (event) => { 
+let request;
+async function createRequest(event){
   event.preventDefault();
   p.textContent = '';
   for(let span of spans){
     span.textContent = '';
   }
-  firstRequest = createRequest(chosenOption);
-    if(chosenOption !== 3){
-      fetch(firstRequest)
-      .then((response) => {
-        if(!response.ok) {
-          throw new Error('Invalid input of the city');
-        }
-        return response.json()
-      })
-      .then((obj) => {
-        if(Array.isArray(obj)){
-          coordinates = [obj[0].lat, obj[0].lon]
-        }
-        else {
-          coordinates = [obj.lat, obj.lon]
-        }
-        chosenOption = 2;
-        return coordinates;
-      })
-      .then((coords) => {
-        secondRequest = createRequest(chosenOption);
-        if(chosenOption !== 3){
-          fetch(secondRequest)
-          .then((res) => {
-            if(!res.ok) throw new Error('Something went wrong')
-            return res.json()
-          })
-          .then((data) => {
-            spans[0].textContent = data.main.temp;
-            spans[1].textContent = data.wind.speed;
-            spans[2].textContent = data.main.humidity;
-          })
-        }
-      })
-      .catch((error) => {
-        p.textContent = error.message;
-        p.removeAttribute('hidden')
-      })
-    }
+  radioName.checked ? request = new Request(`${requestUrl}q=${inputName.value.trim()}&appid=${appId}&units=metric`) : request = new Request(`${requestUrl}id=${inputId.value.trim()}&appid=${appId}&units=metric`);
+  try {
+    const response = await fetch(request);
+    if(!response.ok) throw new Error('Something went wrong with your request.Try again!')
+    const json = await response.json();
+    spans[0].textContent = await json.main.temp;
+    spans[1].textContent = await json.wind.speed;
+    spans[2].textContent = await json.main.humidity;
+  } catch (error) {
+    p.textContent = error.message;
+    p.removeAttribute('hidden');
+  }
+}
+function checkRadioButtons(){
+  if(radioName.checked){
+    inputId.setAttribute('disabled', true)
+    inputName.removeAttribute('disabled')
+  }
+  else{
+    inputName.setAttribute('disabled', true)
+    inputId.removeAttribute('disabled')
+  }
+}
+checkRadioButtons();
+radioName.addEventListener('change', ()=> {  //checking which radio-button's chosen
+  inputId.setAttribute('disabled', true)
+  inputName.removeAttribute('disabled')
 })
+radioId.addEventListener('change', ()=> {
+  inputName.setAttribute('disabled', true)
+  inputId.removeAttribute('disabled')
+})
+
+buttonConfirm.addEventListener('click', createRequest)
 buttonCancel.addEventListener('click', (event) => {
   for(let span of spans){
     span.textContent = '';
   }
-  chosenOption = 3;
-  inputName.removeAttribute('disabled');
-  inputId.removeAttribute('disabled');
+  p.textContent = ''
+  p.setAttribute('hidden', true);
+  radioName.checked = true;
+  checkRadioButtons();
 })
